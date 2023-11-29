@@ -14,7 +14,7 @@ return [
     |
     */
 
-    'title' => 'Laravel 8',
+    'title' => '1210 Services',
     'title_prefix' => '',
     'title_postfix' => '',
 
@@ -63,7 +63,7 @@ return [
     |
     */
 
-    'logo' => 'Laravel 8',
+    'logo' => '1210 Services',
     'logo_img' => 'vendor/adminlte/dist/img/AdminLTELogo.png',
     'logo_img_class' => 'brand-image img-circle elevation-3',
     'logo_img_xl' => null,
@@ -303,17 +303,17 @@ return [
 
         // Sidebar items:
         [
-            'text'    => 'Products',
+            'text'    => 'Tasks',
             'icon'    => 'fa fa-fw fa-shopping-cart',
             'submenu' => [
                 [
-                    'text' => 'Product List',
-                    'url'  => '/products',
+                    'text' => 'Tasks List',
+                    'url'  => '/tasks',
                     'icon'  => 'fa fa-chevron-right',
                 ],
                 [
-                    'text' => 'Create Product',
-                    'url'  => '/products/create',
+                    'text' => 'Create Task',
+                    'url'  => '/tasks/create',
                     'icon'    => 'fa fa-chevron-right',
                 ],
             ],

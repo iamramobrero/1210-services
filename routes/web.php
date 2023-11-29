@@ -2,7 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\ProductController;
+use App\Http\Controllers\TaskController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -25,5 +25,5 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('/', [DashboardController::class, 'showDashboard'])->name('showDashboard');
     Route::post('/logout', [AuthController::class, 'doLogout'])->name('doLogout');
 
-    Route::resource('products', ProductController::class);
+    Route::resource('tasks', TaskController::class);
 });
