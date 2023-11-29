@@ -4,25 +4,27 @@
 @section('content_header')
 <div class="d-flex justify-content-between align-items-center">
     <h1>{{$pageTitle}}</h1>
-    <a href="{{ route('products.create') }}" class="btn btn-primary btn-sm"><i class="fa fa-plus"></i> Create Product</a>
+    <a href="{{ route('tasks.create') }}" class="btn btn-primary btn-sm"><i class="fa fa-plus"></i> Create Task</a>
 </div>
 @stop
 
 @section('content')
 <div class="container position-relative">
-    <div class="row mb-3" v-if="products">
+    <div class="row mb-3" v-if="tasks">
         <div class="col">
             <div class="card">
                 <div class="card-body d-md-flex justify-content-between">
                     <div class="flex-fill align-self-end p-1">
                         <label>Keywords (Comma separated)</label>
-                        <input type="text" class="form-control form-control-sm" placeholder="Search product Name or Description. Use comma for multiple keywords" v-model="filter.keyword">
+                        <input type="text" class="form-control form-control-sm" placeholder="Search tasks Name or Description. Use comma for multiple keywords" v-model="filter.keyword">
                     </div>
                     <div class="flex-fill align-self-end p-1">
-                        <label>Category</label>
-                        <select class="form-control form-control-sm" v-model="filter.category">
-                            <option value="">-- All Category --</option>
-                            <option v-for="item in productCategories" :value="item.id">@{{ item.name }}</option>
+                        <label>Status</label>
+                        <select class="form-control form-control-sm" v-model="filter.status">
+                            <option value="">-- All Status --</option>
+                            <option value="to-do">To Do</option>
+                            <option value="in-progress">In Progress</option>
+                            <option value="completed">Completed</option>
                         </select>
                     </div>
                     <div class="flex-fill align-self-end p-1">
@@ -42,7 +44,7 @@
                         </select>
                     </div>
                     <div class="flex-fill align-self-end text-center p-1 d-flex justify-content-between">
-                        <button class="btn btn-sm btn-primary flex-fill mr-1" @click="getProducts()">Search</button>
+                        <button class="btn btn-sm btn-primary flex-fill mr-1" @click="getTasks()">Search</button>
                         <button class="btn btn-sm btn-danger flex-fill" @click="resetFilters()">Reset</button>
                     </div>
                 </div>
@@ -59,32 +61,31 @@
         <thead>
             <tr>
                 <th class="text-center">ID</th>
-                <th class="text-center">Image</th>
-                <th>Product Name</th>
-                <th>Category</th>
-                <th>Date</th>
+                {{-- <th class="text-center">Image</th> --}}
+                <th>Task Name</th>
+                <th class="text-center">Status</th>
+                <th>Content</th>
                 <th class="text-center">Actions</th>
             </tr>
         </thead>
         <tbody>
-            <tr v-if="!products.length">
-                <td colspan="6" class="text-center p-3 text-danger">No products found</td>
+            <tr v-if="!tasks.length">
+                <td colspan="6" class="text-center p-3 text-danger">No tasks found</td>
             </tr>
-            <tr v-if="products.length" v-for="product in products">
-                <td><a :href="product.routes.edit">@{{ product.id }}</a></td>
-                <td class="text-center"><img :src="product.image" class="img-thumbnail" style="max-width: 74px;"></td>
-                <td><a :href="product.routes.edit">@{{ product.name }}</a></td>
-                <td>@{{ product.category.name }}</td>
-                <td>@{{ product.date }}</td>
+            <tr v-if="tasks.length" v-for="tasks in tasks">
+                <td><a :href="tasks.routes.edit">@{{ tasks.id }}</a></td>
+                <td><a :href="tasks.routes.edit">@{{ tasks.title }}</a></td>
+                <td v-html:="tasks.status_badge" class="text-center"></td>
+                <td>@{{ tasks.content }}</td>
                 <td class="text-center">
                     <div class="btn-group">
-                        <a :href="product.routes.edit" class="btn btn-light btn-sm text-primary"><i class="fas fa-pen"></i></a>
-                        <button class="btn btn-sm text-danger btn-light " @click="deleteProduct(product)"><i class="fas fa-trash"></i></button>
+                        <a :href="tasks.routes.edit" class="btn btn-light btn-sm text-primary"><i class="fas fa-pen"></i></a>
+                        <button class="btn btn-sm text-danger btn-light " @click="deleteTask(tasks)"><i class="fas fa-trash"></i></button>
                     </div>
                 </td>
             </tr>
         </tbody>
-        <tfoot v-if="products.length">
+        <tfoot v-if="tasks.length">
             <tr>
                 <td colspan="5">
                     <div class="input-group d-flex justify-content-center">
@@ -140,14 +141,13 @@ vueTable = createApp({
     data() {
         return {
             isTableLoading : true,
-            products : {},
+            tasks : {},
             links: {},
             meta: {},
             current_page:1,
-            productCategories:{},
             filter:{
                 keyword:'',
-                category:'',
+                status:'',
                 sort_order:'DESC',
                 sort_by:'id',
             },
@@ -157,26 +157,14 @@ vueTable = createApp({
         resetFilters(){
             vueTable.filter = {
                 keyword:'',
-                category:'',
+                status:'',
             };
 
-            vueTable.getProducts()
+            vueTable.getTasks()
         },
-
-        getProductCategories(){
-            axios.get(`{{ route('api.product-categories.data') }}`,{
-                headers: {
-                    'Authorization': 'Bearer {{ $apiToken }}'
-                }
-            })
-            .then(response => {
-                vueTable.productCategories = response.data.data;
-            });
-        },
-
-        getProducts(){
+        getTasks(){
             vueTable.isTableLoading = true;
-            axios.get(`{{ route('api.products.data') }}?page=${vueTable.current_page}&sort_by=${vueTable.filter.sort_by}&sort_order=${vueTable.filter.sort_order}&keyword=${vueTable.filter.keyword}&category=${vueTable.filter.category}`,{
+            axios.get(`{{ route('api.tasks.data') }}?page=${vueTable.current_page}&sort_by=${vueTable.filter.sort_by}&sort_order=${vueTable.filter.sort_order}&keyword=${vueTable.filter.keyword}&status=${vueTable.filter.status}`,{
                 headers: {
                     'Authorization': 'Bearer {{ $apiToken }}'
                 }
@@ -184,19 +172,19 @@ vueTable = createApp({
             .then(response => {
                 vueTable.links = response.data.links;
                 vueTable.meta = response.data.meta;
-                vueTable.products = response.data.data;
+                vueTable.tasks = response.data.data;
                 vueTable.current_page = response.data.meta.current_page;
                 vueTable.isTableLoading = false;
             });
         },
 
-        deleteProduct(product) {
+        deleteTask(tasks) {
             Swal.fire({
-                text: `Are you sure you want to delete ${product.name} ?`,
+                text: `Are you sure you want to delete ${tasks.name} ?`,
                 icon: "question",
                 preConfirm:function(){
                     vueTable.isTableLoading = true;
-                    axios.delete(product.routes.destroy,{
+                    axios.delete(tasks.routes.destroy,{
                         headers: {
                             'Authorization': 'Bearer {{ $apiToken }}'
                         }
@@ -206,7 +194,7 @@ vueTable = createApp({
                             icon: response.data.type,
                             title: response.data.message
                         });
-                        vueTable.getProducts();
+                        vueTable.getTasks();
                     });
                 }
             });
@@ -216,13 +204,12 @@ vueTable = createApp({
             if(page)
                 vueTable.current_page = page;
 
-            vueTable.getProducts();
+            vueTable.getTasks();
         }
 
     }
 }).mount('.content')
-vueTable.getProducts();
-vueTable.getProductCategories();
+vueTable.getTasks();
 
 </script>
 @stop

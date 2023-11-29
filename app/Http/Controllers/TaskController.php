@@ -2,26 +2,56 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\TaskResource;
 use App\Models\Task;
 use Illuminate\Http\Request;
 
-class TaskController extends Controller
+class TaskController extends BaseController
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
+    public function __construct()
     {
-        //
+        $this->pageTitle = 'Tasks';
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
+    public function index(Request $request)
+    {
+        $this->apiToken = $request->cookie('apiToken');
+        return view('tasks.index');
+    }
+
+    public function data(Request $request){
+
+        $data = Task::select('tasks.*');
+
+        if(isset($request->status) && $request->status != '')
+            $data = $data->where('status', $request->status);
+
+        if(isset($request->keyword) && $request->keyword != ''){
+            $keywords = array_map('trim', explode(',', $request->keyword));
+
+            $data = $data->where(function($query) use ($keywords){
+                foreach($keywords as $keyword)
+                    $query->orWhere('title', 'like', "%{$keyword}%")->orWhere('content', 'like', "%{$keyword}%");
+            });
+        }
+
+        if(isset($request->sort_by) && $request->sort_by != ''){
+            $sortBy ='id';
+            $sortOrder = $request->input('sort_order','ASC');
+            if($request->sort_by=='date') $sortBy = 'datetime_at';
+            elseif($request->sort_by=='title') $sortBy = 'products.title';
+            elseif($request->sort_by=='status'){
+                $sortBy = 'products.status';
+            };
+            $data = $data->orderBy($sortBy,$sortOrder);
+        }
+
+
+        $data = $data->paginate(10);
+        return TaskResource::collection($data);
+    }
+
+
     public function create()
     {
         //

@@ -21,6 +21,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::group(['middleware' => ['auth:api']], function () {
     Route::name("api.")->group(function ($router) {
+        Route::get('tasks/data', [TaskController::class,'data'])->name('tasks.data');
         Route::apiResource('tasks', TaskController::class);
     });
 });
