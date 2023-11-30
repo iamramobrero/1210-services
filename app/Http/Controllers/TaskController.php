@@ -76,7 +76,7 @@ class TaskController extends BaseController
      */
     public function show(Task $task)
     {
-        //
+        return new TaskResource($task);
     }
 
     /**
@@ -85,9 +85,11 @@ class TaskController extends BaseController
      * @param  \App\Models\Task  $task
      * @return \Illuminate\Http\Response
      */
-    public function edit(Task $task)
+    public function edit(Task $task, Request $request)
     {
-        //
+        $this->apiToken = $request->cookie('apiToken');
+        $this->task = $task;
+        return view('tasks.edit');
     }
 
     /**
